@@ -10,27 +10,46 @@ forwarding port 22 to this machine.
 
 ```mermaid
 graph LR
-    Internet -->|router port-forward| sshd["sshd"]
+    Internet -->|router port-forward| sshd["sshd<br>key-only auth"]
     sshd --> shell["local shell access"]
+    f2b["fail2ban<br>sshd jail"] -.->|bans repeat offenders| Internet
 ```
 
 ## Config
 
-Stock Debian `openssh-server` config — `/etc/ssh/sshd_config` is unmodified from the
-package default, and `/etc/ssh/sshd_config.d/` (which the main config `Include`s) has
-no local override files. Notable stock settings currently in effect:
+Stock Debian `openssh-server` config (`/etc/ssh/sshd_config`, unmodified) plus one
+local override in `/etc/ssh/sshd_config.d/`:
+[`99-hardening.conf`](sshd_config.d/99-hardening.conf):
 
 ```
+PasswordAuthentication no
 KbdInteractiveAuthentication no
-UsePAM yes
-X11Forwarding yes
-PrintMotd no
-AcceptEnv LANG LC_*
-Subsystem sftp /usr/lib/openssh/sftp-server
+PermitRootLogin no
 ```
 
-No local hardening (e.g. disabling password auth, changing the port, `AllowUsers`)
-has been layered on yet — worth revisiting if this box stays internet-facing.
+Password/keyboard-interactive login is disabled — key-only auth. **Before deploying
+this on a fresh box**, make sure a working key is already in
+`~/.ssh/authorized_keys` (mode `600`, `~/.ssh` mode `700`) and verified from your
+actual client — disabling password auth without one locks you out entirely, with no
+fallback but console/physical access.
 
-**Related**: [PR #1](https://github.com/sillyash/homelab/pull/1) proposes key-only
-auth + fail2ban for this.
+Other stock settings still in effect: `UsePAM yes`, `X11Forwarding yes`,
+`PrintMotd no`, `AcceptEnv LANG LC_*`, `Subsystem sftp /usr/lib/openssh/sftp-server`.
+
+## Brute-force protection
+
+[fail2ban](../fail2ban/README.md)'s `sshd` jail bans an IP for 1h after 5 failed
+attempts within 10 minutes. There's a steady trickle of bots trying `root` logins on
+port 22 — `PermitRootLogin no` + fail2ban keeps that from going anywhere.
+
+## Useful commands
+
+```bash
+systemctl status ssh                        # is sshd running
+systemctl reload ssh                        # apply sshd_config changes (safer than restart — doesn't drop existing sessions)
+sshd -t                                     # validate config before reloading
+sshd -T | grep -i passwordauthentication    # check an effective setting
+journalctl -u ssh -n 50 --no-pager          # recent sshd log
+fail2ban-client status sshd                 # jail status / currently banned IPs
+fail2ban-client set sshd unbanip <IP>       # manually unban an IP
+```

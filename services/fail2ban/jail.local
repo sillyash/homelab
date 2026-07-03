@@ -1,0 +1,16 @@
+[sshd]
+enabled = true
+port    = ssh
+backend = systemd
+maxretry = 5
+findtime = 10m
+bantime  = 1h
+
+[transmission-rpc]
+enabled  = true
+filter   = transmission-rpc
+port     = http,https
+logpath  = /var/log/nginx/access.log
+maxretry = 8
+findtime = 10m
+bantime  = 2h

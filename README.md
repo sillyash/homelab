@@ -48,6 +48,7 @@ map of how they fit together.
 | Transmission | BitTorrent client, `transmission.sillyash.com` | [services/transmission](services/transmission/README.md) |
 | dropservice | Custom password-gated Flask file-upload service, `drop.sillyash.com` — own repo, included as a submodule | [services/dropservice](services/dropservice) |
 | SSH | Remote shell access, `ssh.sillyash.com:22` (direct, not nginx-proxied) | [services/ssh](services/ssh/README.md) |
+| fail2ban | Bans IPs after repeated failed SSH/Transmission-login attempts | [services/fail2ban](services/fail2ban/README.md) |
 
 Config snippets and systemd units in this repo are the real files from the running
 box, with all secrets (API tokens, passwords) redacted or replaced by `.example`
