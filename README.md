@@ -9,7 +9,7 @@ publicly reachable as subdomains of `sillyash.com` (Cloudflare-managed DNS).
 ## Overview
 
 ```mermaid
-%%{init: {"theme": "dark"}}%%
+%%{init: {"theme": "forest"}}%%
 graph TB
     Internet[Internet]
     Cloudflare["Cloudflare<br>DNS zone: sillyash.com"]
@@ -18,14 +18,14 @@ graph TB
         ddclient["ddclient<br>DDNS updater"]
         certbot["certbot<br>+ dns-cloudflare plugin"]
         nginx["nginx<br>reverse proxy / TLS"]
-        jellyfin["Jellyfin :8096"]
-        transmission["Transmission :9091"]
-        dropservice["dropservice :8080<br>(Flask, custom)"]
-        sshd["sshd :22"]
+        jellyfin["Jellyfin"]
+        transmission["Transmission"]
+        dropservice["dropservice<br>(Flask, custom)"]
+        sshd["sshd"]
     end
 
-    Internet -->|"jelly / transmission /<br>drop . sillyash.com"| Cloudflare
-    Internet -->|"ssh.sillyash.com : 22"| Cloudflare
+    Internet -->|"jelly.sillyash.com<br>transmission.sillyash.com<br>drop.sillyash.com"| Cloudflare
+    Internet -->|"ssh.sillyash.com"| Cloudflare
     Cloudflare -->|resolves to| Pi
 
     ddclient -->|"pushes current public IP<br>(A records)"| Cloudflare
