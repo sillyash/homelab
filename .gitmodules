@@ -1,0 +1,3 @@
+[submodule "services/dropservice"]
+	path = services/dropservice
+	url = git@github.com:sillyash/dropservice.git

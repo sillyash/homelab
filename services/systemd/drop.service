@@ -1,0 +1,13 @@
+[Unit]
+Description=File drop service
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/dropservice
+EnvironmentFile=/opt/dropservice/.env
+ExecStart=/opt/dropservice/.venv/bin/python main.py
+Restart=always
+User=www-data
+
+[Install]
+WantedBy=multi-user.target
