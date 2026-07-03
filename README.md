@@ -9,34 +9,33 @@ publicly reachable as subdomains of `sillyash.com` (Cloudflare-managed DNS).
 ## Overview
 
 ```mermaid
-%%{init: {"theme": "forest"}}%%
 graph TB
     Internet[Internet]
-    Cloudflare["Cloudflare<br>DNS zone: sillyash.com"]
+    Cloudflare["Cloudflare DNS"]
 
     subgraph Pi["Raspberry Pi 5 — Debian 12"]
-        ddclient["ddclient<br>DDNS updater"]
-        certbot["certbot<br>+ dns-cloudflare plugin"]
-        nginx["nginx<br>reverse proxy / TLS"]
+        ddclient["ddclient"]
+        certbot["certbot"]
+        nginx["nginx"]
         jellyfin["Jellyfin"]
         transmission["Transmission"]
-        dropservice["dropservice<br>(Flask, custom)"]
+        dropservice["dropservice"]
         sshd["sshd"]
     end
 
-    Internet -->|"jelly.sillyash.com<br>transmission.sillyash.com<br>drop.sillyash.com"| Cloudflare
-    Internet -->|"ssh.sillyash.com"| Cloudflare
-    Cloudflare -->|resolves to| Pi
+    Internet --> Cloudflare --> Pi
+    ddclient --> Cloudflare
+    certbot --> Cloudflare
+    certbot --> nginx
 
-    ddclient -->|"pushes current public IP<br>(A records)"| Cloudflare
-    certbot -->|"DNS-01 challenge<br>(TXT records)"| Cloudflare
-    certbot -->|"issues/renews certs for"| nginx
-
-    nginx -->|"proxy_pass"| jellyfin
-    nginx -->|"proxy_pass"| transmission
-    nginx -->|"proxy_pass"| dropservice
-    sshd -.->|"not proxied — direct TCP"| Internet
+    nginx --> jellyfin
+    nginx --> transmission
+    nginx --> dropservice
+    sshd -.-> Internet
 ```
+
+Each service's own README below has a more detailed diagram — this one is just the
+map of how they fit together.
 
 ## Services
 
