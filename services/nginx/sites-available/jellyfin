@@ -1,0 +1,47 @@
+# Redirect all HTTP to HTTPS
+server {
+    listen 80;
+    server_name jelly.sillyash.com transmission.sillyash.com;
+    return 301 https://$host$request_uri;
+}
+
+# Jellyfin
+server {
+    listen 443 ssl;
+    server_name jelly.sillyash.com;
+
+    ssl_certificate     /etc/letsencrypt/live/jelly.sillyash.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/jelly.sillyash.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:8096;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_buffering off;
+    }
+}
+
+# Transmission
+server {
+    listen 443 ssl;
+    server_name transmission.sillyash.com;
+
+    ssl_certificate     /etc/letsencrypt/live/jelly.sillyash.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/jelly.sillyash.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:9091;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}

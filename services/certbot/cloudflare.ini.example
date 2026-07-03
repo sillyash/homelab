@@ -1,0 +1,4 @@
+# /etc/letsencrypt/cloudflare.ini
+# Cloudflare API token scoped to Zone:DNS:Edit for the target zone only.
+# chmod 600 this file once populated — certbot refuses to run otherwise.
+dns_cloudflare_api_token = <REDACTED-CLOUDFLARE-API-TOKEN>
