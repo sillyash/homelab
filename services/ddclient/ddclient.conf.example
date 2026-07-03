@@ -1,0 +1,11 @@
+# Configuration file for ddclient
+ssl=yes
+daemon=5m
+use=web, web=https://api.ipify.org/
+
+protocol=cloudflare
+zone=sillyash.com
+ttl=1
+login=token
+password=<REDACTED-CLOUDFLARE-API-TOKEN>
+jelly.sillyash.com,transmission.sillyash.com,ssh.sillyash.com
