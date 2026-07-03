@@ -17,6 +17,27 @@ All three terminate TLS with certs from [certbot](../certbot/README.md) and redi
 plain HTTP (port 80) to HTTPS. `default` (Debian's stock `sites-available/default`)
 stays enabled as the catch-all for requests that don't match a `server_name`.
 
+## Architecture
+
+```mermaid
+graph LR
+    client1["Browser<br>jelly.sillyash.com"]
+    client2["Browser<br>transmission.sillyash.com"]
+    client3["Browser<br>drop.sillyash.com"]
+
+    nginx["nginx :80 / :443<br>TLS termination"]
+    jellyfin["Jellyfin :8096"]
+    transmission["Transmission :9091"]
+    dropservice["dropservice :8080"]
+
+    client1 -->|HTTPS| nginx
+    client2 -->|HTTPS| nginx
+    client3 -->|HTTPS| nginx
+    nginx -->|proxy_pass| jellyfin
+    nginx -->|proxy_pass| transmission
+    nginx -->|proxy_pass| dropservice
+```
+
 ## Files in this repo
 
 - [`sites-available/drop`](sites-available/drop) — real vhost for dropservice.

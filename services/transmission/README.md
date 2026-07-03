@@ -4,6 +4,20 @@ BitTorrent client, web UI reachable at `https://transmission.sillyash.com` via t
 [nginx](../nginx/README.md) reverse proxy (nginx handles TLS; the daemon itself
 listens on plain HTTP on `9091`).
 
+## Architecture
+
+```mermaid
+graph LR
+    Internet -->|"HTTPS + RPC auth"| nginx["nginx"]
+    nginx --> transmission["Transmission :9091"]
+    transmission --> downloads["/var/lib/transmission-daemon/downloads"]
+    bots(("bots probing<br>the login prompt")) -.->|noise / brute force| nginx
+```
+
+Kept intentionally public so torrents can be added remotely — but the login prompt
+gets probed by bots constantly. Mitigation is tracked as an open proposal rather than
+fixed silently here.
+
 ## Install
 
 ```bash

@@ -6,6 +6,14 @@ nginx — nginx only terminates HTTP/HTTPS, and SSH is a raw TCP protocol). The
 just points at the box's public IP; reaching it depends on the home router
 forwarding port 22 to this machine.
 
+## Architecture
+
+```mermaid
+graph LR
+    Internet -->|router port-forward| sshd["sshd"]
+    sshd --> shell["local shell access"]
+```
+
 ## Config
 
 Stock Debian `openssh-server` config — `/etc/ssh/sshd_config` is unmodified from the

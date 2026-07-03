@@ -7,6 +7,26 @@ dynamic IP ([ddclient](../ddclient/README.md) keeps DNS pointed at it) — provi
 domain ownership via a DNS TXT record is simpler and more reliable than depending on
 inbound port 80 always reaching this exact machine.
 
+## Architecture
+
+```mermaid
+graph LR
+    timer["certbot.timer<br>twice daily"]
+    certbot["certbot<br>+ dns-cloudflare plugin"]
+    cf["Cloudflare API"]
+    txt["_acme-challenge<br>TXT record"]
+    le["Let's Encrypt"]
+    nginx["nginx"]
+
+    timer -->|triggers| certbot
+    certbot -->|creates| txt
+    txt --> cf
+    certbot -->|requests validation| le
+    le -->|checks TXT via DNS| cf
+    le -->|issues cert| certbot
+    certbot -->|writes to /etc/letsencrypt/live| nginx
+```
+
 ## Install
 
 ```bash

@@ -3,6 +3,19 @@
 Keeps Cloudflare DNS pointed at the box's current public IP, since it's on a
 residential (dynamic IP) connection.
 
+## Architecture
+
+```mermaid
+graph LR
+    ddclient["ddclient daemon"]
+    ipify["api.ipify.org"]
+    cf["Cloudflare API"]
+
+    ddclient -->|"poll every 5m"| ipify
+    ipify -->|current public IP| ddclient
+    ddclient -->|"update A records<br>jelly / transmission / ssh"| cf
+```
+
 ## Install
 
 ```bash
