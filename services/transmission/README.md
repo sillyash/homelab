@@ -8,18 +8,25 @@ listens on plain HTTP on `9091`).
 
 ```mermaid
 graph LR
-    Internet -->|"HTTPS + RPC auth"| nginx["nginx"]
+    Internet -->|"HTTPS + RPC auth"| nginx["nginx<br>rate-limited"]
     nginx --> transmission["Transmission :9091"]
     transmission --> downloads["/var/lib/transmission-daemon/downloads"]
-    bots(("bots probing<br>the login prompt")) -.->|noise / brute force| nginx
+    bots(("bots probing<br>the login prompt")) -.->|throttled + banned| nginx
+    f2b["fail2ban<br>transmission-rpc jail"] -.->|bans repeat 401s| Internet
 ```
 
-Kept intentionally public so torrents can be added remotely — but the login prompt
-gets probed by bots constantly. Mitigation is tracked as an open proposal rather than
-fixed silently here.
+Kept intentionally public so torrents can be added remotely. The login prompt gets
+probed by bots constantly, so it's mitigated rather than moved behind a VPN:
 
-**Related**: [PR #2](https://github.com/sillyash/homelab/pull/2) proposes nginx rate
-limiting + fail2ban for this.
+- **nginx rate limiting** ([`conf.d/rate-limit.conf`](../nginx/conf.d/rate-limit.conf),
+  applied in the `transmission.sillyash.com` server block in
+  [`sites-available/jellyfin`](../nginx/sites-available/jellyfin)): `5r/m` per IP with
+  a burst of 5, plus a cap of 5 concurrent connections per IP. Throttles bots before
+  they even reach Transmission; a human occasionally logging in to add a torrent is
+  unaffected.
+- **[fail2ban](../fail2ban/README.md)'s `transmission-rpc` jail**: bans an IP for 2h
+  after 8 failed (HTTP 401) login attempts within 10 minutes, parsed from nginx's
+  access log.
 
 ## Install
 

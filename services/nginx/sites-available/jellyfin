@@ -35,6 +35,9 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/jelly.sillyash.com/privkey.pem;
 
     location / {
+        limit_req zone=transmission_rpc burst=5 nodelay;
+        limit_conn transmission_conn 5;
+
         proxy_pass http://localhost:9091;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

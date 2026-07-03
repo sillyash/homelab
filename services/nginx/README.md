@@ -43,7 +43,12 @@ graph LR
 - [`sites-available/drop`](sites-available/drop) — real vhost for dropservice.
 - [`sites-available/jellyfin`](sites-available/jellyfin) — real vhost for both
   Jellyfin and Transmission (they share the same Let's Encrypt cert since it covers
-  both hostnames as SANs).
+  both hostnames as SANs). The Transmission `server{}` block also applies rate
+  limiting — see below.
+- [`conf.d/rate-limit.conf`](conf.d/rate-limit.conf) — `limit_req_zone`/
+  `limit_conn_zone` definitions (must live in the `http{}` context, so they're a
+  separate `conf.d/` file rather than inline in the vhost) used to throttle bots
+  hitting [Transmission's public login](../transmission/README.md).
 
 To deploy: copy into `/etc/nginx/sites-available/`, symlink into `sites-enabled/`,
 then `nginx -t && systemctl reload nginx`.
