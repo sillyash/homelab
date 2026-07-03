@@ -18,6 +18,9 @@ Kept intentionally public so torrents can be added remotely — but the login pr
 gets probed by bots constantly. Mitigation is tracked as an open proposal rather than
 fixed silently here.
 
+**Related**: [PR #2](https://github.com/sillyash/homelab/pull/2) proposes nginx rate
+limiting + fail2ban for this.
+
 ## Install
 
 ```bash

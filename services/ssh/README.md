@@ -31,3 +31,6 @@ Subsystem sftp /usr/lib/openssh/sftp-server
 
 No local hardening (e.g. disabling password auth, changing the port, `AllowUsers`)
 has been layered on yet — worth revisiting if this box stays internet-facing.
+
+**Related**: [PR #1](https://github.com/sillyash/homelab/pull/1) proposes key-only
+auth + fail2ban for this.
