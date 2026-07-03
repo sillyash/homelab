@@ -56,3 +56,13 @@ Stock unit shipped by the `ddclient` package (`/lib/systemd/system/ddclient.serv
 ```bash
 systemctl enable --now ddclient
 ```
+
+## Useful commands
+
+```bash
+sudo systemctl restart ddclient            # apply a ddclient.conf change
+systemctl status ddclient                  # running? last update result?
+sudo ddclient -daemon 0 -verbose -noquiet  # force a single foreground update run, verbose (for debugging)
+sudo ddclient -query                       # check what IP ddclient last determined, without updating
+journalctl -u ddclient -n 50 --no-pager    # recent update history
+```
