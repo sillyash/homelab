@@ -58,3 +58,16 @@ with the package is left fully commented out.
 ```bash
 systemctl enable --now jellyfin
 ```
+
+## Useful commands
+
+```bash
+sudo systemctl restart jellyfin            # apply a config change (Jellyfin doesn't hot-reload most settings)
+systemctl status jellyfin                  # running?
+journalctl -u jellyfin -n 100 --no-pager   # recent logs
+journalctl -u jellyfin -f                  # follow logs live (e.g. while debugging a transcode)
+df -h /media/sillyash/Movies /media/sillyash/Series   # confirm both drives are actually mounted
+```
+
+Most day-to-day admin (adding libraries, users, scan-for-new-media) is done through
+the web UI at `https://jelly.sillyash.com/web/#/dashboard` rather than the CLI.

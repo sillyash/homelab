@@ -62,3 +62,17 @@ systemctl stop transmission-daemon
 # edit rpc-username / rpc-password in settings.json, or use transmission-remote
 systemctl start transmission-daemon
 ```
+
+## Useful commands
+
+```bash
+sudo systemctl restart transmission-daemon   # apply a settings.json change (must be stopped while editing, see above)
+systemctl status transmission-daemon         # running?
+journalctl -u transmission-daemon -n 50 --no-pager
+
+# transmission-remote — CLI client, talks to the same RPC endpoint the web UI uses
+transmission-remote localhost:9091 --auth <user>:<pass> -l              # list torrents
+transmission-remote localhost:9091 --auth <user>:<pass> -a "<magnet-or-.torrent-url>"  # add a torrent
+transmission-remote localhost:9091 --auth <user>:<pass> -t <id> -S      # stop a torrent
+transmission-remote localhost:9091 --auth <user>:<pass> -t <id> --info  # details on one torrent
+```

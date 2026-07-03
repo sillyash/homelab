@@ -55,6 +55,25 @@ box, with all secrets (API tokens, passwords) redacted or replaced by `.example`
 templates — nothing here is committed as-is without checking for sensitive values
 first.
 
+## Quick command reference
+
+Restart / status / logs for each systemd-managed service. See each service's own
+README for config testing, cert renewal, torrent CLI, fail2ban ban/unban, etc.
+
+| Service | Restart | Status | Logs |
+|---|---|---|---|
+| [nginx](services/nginx/README.md) | `sudo systemctl reload nginx` | `systemctl status nginx` | `sudo tail -f /var/log/nginx/access.log` |
+| [certbot](services/certbot/README.md) | n/a — timer-driven | `systemctl status certbot.timer` | `journalctl -u certbot -n 50` |
+| [ddclient](services/ddclient/README.md) | `sudo systemctl restart ddclient` | `systemctl status ddclient` | `journalctl -u ddclient -n 50` |
+| [Jellyfin](services/jellyfin/README.md) | `sudo systemctl restart jellyfin` | `systemctl status jellyfin` | `journalctl -u jellyfin -f` |
+| [Transmission](services/transmission/README.md) | `sudo systemctl restart transmission-daemon` | `systemctl status transmission-daemon` | `journalctl -u transmission-daemon -n 50` |
+| [dropservice](services/systemd/README.md) | `sudo systemctl restart drop` | `systemctl status drop` | `journalctl -u drop -f` |
+| [SSH](services/ssh/README.md) | `sudo systemctl reload ssh` | `systemctl status ssh` | `journalctl -u ssh -n 50` |
+| [fail2ban](services/fail2ban/README.md) | `sudo systemctl restart fail2ban` | `fail2ban-client status` | `journalctl -u fail2ban -n 50` |
+
+Prefer `reload` over `restart` where shown — it re-reads config without dropping
+active connections/sessions.
+
 ## Cloning
 
 `dropservice` is a git submodule:

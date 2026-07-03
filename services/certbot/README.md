@@ -71,3 +71,31 @@ systemctl status certbot.timer
 - `jelly.sillyash.com` (covers `jelly.sillyash.com` + `transmission.sillyash.com` as
   SANs) — used by [Jellyfin](../jellyfin/README.md) and
   [Transmission](../transmission/README.md)
+
+## Useful commands
+
+```bash
+sudo certbot certificates                  # list all certs + expiry dates
+sudo certbot renew --dry-run               # test the renewal flow without touching real certs
+sudo certbot renew                         # force renewal attempt now (normally left to the timer)
+sudo certbot certonly --dns-cloudflare \
+  --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+  -d new.sillyash.com                      # issue a cert for a new subdomain
+sudo certbot delete --cert-name <name>     # remove a cert no longer needed
+
+systemctl status certbot.timer             # confirm the renewal timer is active
+systemctl list-timers certbot.timer        # see next scheduled run
+journalctl -u certbot -n 50 --no-pager     # last renewal attempt's output
+```
+
+**No renewal deploy-hook is configured** (`/etc/letsencrypt/renewal-hooks/deploy/` is
+empty) — nginx loads certs into memory at startup/reload and won't notice a renewed
+file on disk by itself. After any renewal, reload nginx manually so it picks up the
+new cert:
+
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Worth revisiting: dropping a script into `renewal-hooks/deploy/` that runs
+`nginx -t && systemctl reload nginx` would make this automatic.

@@ -52,3 +52,19 @@ graph LR
 
 To deploy: copy into `/etc/nginx/sites-available/`, symlink into `sites-enabled/`,
 then `nginx -t && systemctl reload nginx`.
+
+## Useful commands
+
+```bash
+sudo nginx -t                              # validate config syntax before reloading — always do this first
+sudo systemctl reload nginx                # apply config changes without dropping connections
+sudo systemctl restart nginx               # full restart (only if reload isn't enough)
+systemctl status nginx                     # running? recent errors?
+sudo tail -f /var/log/nginx/access.log     # live requests, all vhosts
+sudo tail -f /var/log/nginx/error.log      # live errors (bad proxy_pass, cert issues, etc.)
+
+# enable/disable a vhost
+sudo ln -s /etc/nginx/sites-available/<name> /etc/nginx/sites-enabled/<name>
+sudo rm /etc/nginx/sites-enabled/<name>
+ls -la /etc/nginx/sites-enabled/           # what's currently live
+```
