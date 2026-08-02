@@ -55,6 +55,27 @@ certbot certonly \
   --non-interactive --agree-tos --email admin@sillyash.com
 ```
 
+## Adding a hostname to an existing cert
+
+To add a SAN to a cert that already exists (rather than issuing a new one),
+`--expand` is required or certbot refuses with "existing certificate contains a
+portion of the domains you requested". When adding several hostnames at once, the
+default 10s DNS propagation wait can be too short — Cloudflare doesn't always
+propagate every new `_acme-challenge` TXT record within that window, and Let's
+Encrypt fails validation on whichever one lags. Bump it if that happens:
+
+```bash
+certbot certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+  --dns-cloudflare-propagation-seconds 30 \
+  --expand \
+  -d jelly.sillyash.com -d transmission.sillyash.com \
+  -d sonarr.sillyash.com -d radarr.sillyash.com \
+  -d prowlarr.sillyash.com -d bazarr.sillyash.com -d jellyseerr.sillyash.com \
+  --non-interactive --agree-tos --email admin@sillyash.com
+```
+
 ## Renewal
 
 Handled automatically by the `certbot.timer` systemd timer that ships with the
@@ -68,9 +89,14 @@ systemctl status certbot.timer
 ## Current certificates
 
 - `drop.sillyash.com` — used by [dropservice](../dropservice/README.md)
-- `jelly.sillyash.com` (covers `jelly.sillyash.com` + `transmission.sillyash.com` as
-  SANs) — used by [Jellyfin](../jellyfin/README.md) and
-  [Transmission](../transmission/README.md)
+- `jelly.sillyash.com` (covers `jelly.sillyash.com`, `transmission.sillyash.com`,
+  `sonarr.sillyash.com`, `radarr.sillyash.com`, `prowlarr.sillyash.com`,
+  `bazarr.sillyash.com`, and `jellyseerr.sillyash.com` as SANs — one cert for the
+  whole stack, expanded with `--expand` each time a new host was added) — used by
+  [Jellyfin](../jellyfin/README.md), [Transmission](../transmission/README.md),
+  [Sonarr](../sonarr/README.md), [Radarr](../radarr/README.md),
+  [Prowlarr](../prowlarr/README.md), [Bazarr](../bazarr/README.md), and
+  [Jellyseerr](../jellyseerr/README.md)
 
 ## Useful commands
 

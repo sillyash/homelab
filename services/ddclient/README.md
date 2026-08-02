@@ -13,7 +13,7 @@ graph LR
 
     ddclient -->|"poll every 5m"| ipify
     ipify -->|current public IP| ddclient
-    ddclient -->|"update A records<br>jelly / transmission / ssh"| cf
+    ddclient -->|"update A records<br>jelly / transmission / ssh / arr-stack / jellyseerr"| cf
 ```
 
 ## Install
@@ -27,10 +27,17 @@ apt install ddclient
 - Polls `https://api.ipify.org/` to learn the current public IP (`use=web`).
 - Runs as a daemon (`daemon_interval=5m` in the systemd unit's environment) and pushes
   updates via the Cloudflare API (`protocol=cloudflare`) whenever the IP changes.
-- Updates **A records** for `jelly`, `transmission`, and `ssh` under the
-  `sillyash.com` zone in one pass (dropservice's `drop` record is not in the list —
-  see note below).
+- Updates **A records** for `jelly`, `transmission`, `ssh`, `sonarr`, `radarr`,
+  `prowlarr`, `bazarr`, and `jellyseerr` under the `sillyash.com` zone in one pass
+  (dropservice's `drop` record is not in the list — see note below).
 - `ttl=1` — Cloudflare treats `1` as "Automatic" TTL.
+- **ddclient only ever `PATCH`es an existing record — it can't create a new one.**
+  Adding a new hostname to the list here isn't enough on its own; the A record has
+  to exist in Cloudflare first (dashboard, or one `POST` to
+  `/zones/:zone_id/dns_records`) before ddclient can start keeping it updated. This
+  bit when the arr-stack/Jellyseerr hostnames were added — ddclient just silently
+  failed on those five ("No 'A' record at Cloudflare") until the records were
+  created once, manually.
 
 ## Config
 

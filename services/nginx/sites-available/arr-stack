@@ -1,0 +1,137 @@
+# Redirect all HTTP to HTTPS
+server {
+    listen 80;
+    server_name sonarr.sillyash.com radarr.sillyash.com prowlarr.sillyash.com bazarr.sillyash.com;
+    return 301 https://$host$request_uri;
+}
+
+# Sonarr
+server {
+    listen 443 ssl;
+    server_name sonarr.sillyash.com;
+
+    ssl_certificate     /etc/letsencrypt/live/jelly.sillyash.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/jelly.sillyash.com/privkey.pem;
+
+    # Custom format logs the Location header, since Sonarr replies 302 with
+    # loginFailed=true on bad credentials rather than 401. Feeds fail2ban's
+    # arr-login jail.
+    access_log /var/log/nginx/arr-access.log arr_auth;
+
+    location ~ ^/(login|api/system/account) {
+        limit_req zone=arr_login burst=5 nodelay;
+
+        proxy_pass http://localhost:8989;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://localhost:8989;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+# Radarr
+server {
+    listen 443 ssl;
+    server_name radarr.sillyash.com;
+
+    ssl_certificate     /etc/letsencrypt/live/jelly.sillyash.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/jelly.sillyash.com/privkey.pem;
+
+    access_log /var/log/nginx/arr-access.log arr_auth;
+
+    location ~ ^/(login|api/system/account) {
+        limit_req zone=arr_login burst=5 nodelay;
+
+        proxy_pass http://localhost:7878;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://localhost:7878;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+# Prowlarr
+server {
+    listen 443 ssl;
+    server_name prowlarr.sillyash.com;
+
+    ssl_certificate     /etc/letsencrypt/live/jelly.sillyash.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/jelly.sillyash.com/privkey.pem;
+
+    access_log /var/log/nginx/arr-access.log arr_auth;
+
+    location ~ ^/(login|api/system/account) {
+        limit_req zone=arr_login burst=5 nodelay;
+
+        proxy_pass http://localhost:9696;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://localhost:9696;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+# Bazarr
+server {
+    listen 443 ssl;
+    server_name bazarr.sillyash.com;
+
+    ssl_certificate     /etc/letsencrypt/live/jelly.sillyash.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/jelly.sillyash.com/privkey.pem;
+
+    access_log /var/log/nginx/arr-access.log arr_auth;
+
+    location ~ ^/(login|api/system/account) {
+        limit_req zone=arr_login burst=5 nodelay;
+
+        proxy_pass http://localhost:6767;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://localhost:6767;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}

@@ -55,6 +55,11 @@ non-secret settings currently in effect:
 | `rpc-authentication-required` | `true` | ...login is required, and nginx puts TLS in front of it |
 | `rpc-whitelist-enabled` | `false` | IP whitelist off — relying on auth + TLS instead |
 
+The RPC credentials are also used by [Sonarr](../sonarr/README.md) and
+[Radarr](../radarr/README.md) as their download-client login (username `arrstack`,
+rotated to a freshly generated password when they were wired up — stored in
+`/root/.arr-api-keys` on the Pi, not committed).
+
 Set/change the RPC username & password:
 
 ```bash

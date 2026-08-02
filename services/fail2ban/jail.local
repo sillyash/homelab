@@ -14,3 +14,12 @@ logpath  = /var/log/nginx/access.log
 maxretry = 8
 findtime = 10m
 bantime  = 2h
+
+[arr-login]
+enabled  = true
+filter   = arr-login
+port     = http,https
+logpath  = /var/log/nginx/arr-access.log
+maxretry = 8
+findtime = 10m
+bantime  = 2h
