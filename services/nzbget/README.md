@@ -61,13 +61,27 @@ the control password). Relevant non-secret settings:
 
 | Key | Value | Note |
 |---|---|---|
-| `MainDir` | `/var/lib/nzbget/downloads` | base download dir |
+| `MainDir` | `/media/sillyash/Series/_nzbget-tmp` | base download/staging dir — see note below |
 | `Category1.Name` / `Category1.DestDir` | `Movies` / `/media/sillyash/Movies/_incoming` | matches Radarr's `movieCategory` |
 | `Category2.Name` / `Category2.DestDir` | `Series` / `/media/sillyash/Series/_incoming` | matches Sonarr's `tvCategory` |
 
 Same same-filesystem-hardlink reasoning as Transmission's `_incoming` dirs — each
 category's `DestDir` is on the same physical disk as the corresponding *arr app's
 root folder.
+
+**`MainDir` must not be left on the root filesystem.** It originally defaulted to
+`/var/lib/nzbget/downloads` (the root SD card, ~29GB total) — active downloads sit
+fully assembled/unpacked here (`MainDir/inter`) before being moved to the
+category's `DestDir`, and a queue of a few 4K/2160p remux releases (routinely
+3–17GB *per episode*) filled the root disk to 100% within a session, which in turn
+crashed Jellyfin (it refuses to start with <2GB free anywhere it touches). Moved to
+`/media/sillyash/Series/_nzbget-tmp` (447GB free at time of writing) instead — the
+Series disk was picked over Movies purely because it had more headroom; there's no
+way to set this per-category, so a movie grab does incur one extra cross-disk copy
+during NZBGet's own inter→dest move (harmless, just slightly slower than if it
+matched). If root ever fills up again, check `df -h /` and `du -xh --max-depth=2
+/var` first — `/var/cache/apt` and `/var/log/journal` are the other usual
+suspects (`apt clean`, `journalctl --vacuum-size=200M`).
 
 Control port `6789`, bound to `127.0.0.1` only (`ss -tlnp` shows
 `127.0.0.1:6789`) — reachable from Sonarr/Radarr on the same box, not from outside.
