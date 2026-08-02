@@ -8,4 +8,4 @@ zone=sillyash.com
 ttl=1
 login=token
 password=<REDACTED-CLOUDFLARE-API-TOKEN>
-jelly.sillyash.com,transmission.sillyash.com,ssh.sillyash.com
+jelly.sillyash.com,transmission.sillyash.com,ssh.sillyash.com,sonarr.sillyash.com,radarr.sillyash.com,prowlarr.sillyash.com,bazarr.sillyash.com,jellyseerr.sillyash.com
