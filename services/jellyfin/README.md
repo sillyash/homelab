@@ -49,6 +49,28 @@ Stock paths from `/etc/default/jellyfin`, unmodified:
 | `/var/log/jellyfin` | logs |
 | `/var/cache/jellyfin` | cache/transcoding |
 
+## Excluding staging folders from scans
+
+Both libraries are pointed at their root folders directly (`/media/sillyash/Movies`,
+`/media/sillyash/Series`), so any download-client staging dir living under those
+roots gets scanned as if it were media otherwise — picking up partial/in-progress
+files as junk library entries. Jellyfin 10.11+ supports a native `.ignore` marker:
+an empty `.ignore` file dropped in a directory excludes that directory (and
+everything under it) from future scans; requires a library rescan
+(`POST /Library/Refresh`) to take effect after adding one.
+
+Currently excluded this way:
+
+| Path | Belongs to |
+|---|---|
+| `/media/sillyash/Movies/_incoming` | Transmission staging ([sonarr](../sonarr/README.md)/[radarr](../radarr/README.md) import dir) |
+| `/media/sillyash/Series/_incoming` | Transmission staging |
+| `/media/sillyash/Series/_nzbget-tmp` | NZBGet's `MainDir` — see [nzbget](../nzbget/README.md) |
+
+If a new staging/working dir ever gets added under either root (e.g. a
+Movies-side NZBGet dir), drop a `.ignore` file in it too rather than letting
+Jellyfin scan it.
+
 ## systemd
 
 Stock unit (`/lib/systemd/system/jellyfin.service`), runs as the dedicated
