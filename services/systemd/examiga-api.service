@@ -1,0 +1,12 @@
+[Unit]
+Description=EX-AMIGA API
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/examiga-web/api
+ExecStart=/opt/examiga-web/api/.venv/bin/gunicorn --bind 127.0.0.1:5000 app:app
+Restart=always
+User=www-data
+
+[Install]
+WantedBy=multi-user.target

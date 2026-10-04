@@ -10,6 +10,7 @@ Installed from the Debian repos (`apt install nginx`), config lives under
 | Host | Symlink name | Proxies to | Cert |
 |---|---|---|---|
 | `drop.sillyash.com` | `drop` | `127.0.0.1:8080` (dropservice) | `drop.sillyash.com` |
+| `api.examigaband.com` | `examiga` | `127.0.0.1:5000` (EX-AMIGA API, gunicorn) | `api.examigaband.com` |
 | `jelly.sillyash.com` | `jellyfin` | `localhost:8096` (Jellyfin) | `jelly.sillyash.com` |
 | `transmission.sillyash.com` | `jellyfin` (same file, second `server{}` block) | `localhost:9091` (Transmission) | `jelly.sillyash.com` |
 | `sonarr.sillyash.com` | `arr-stack` | `localhost:8989` (Sonarr) | `jelly.sillyash.com` |

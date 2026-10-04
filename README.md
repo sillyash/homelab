@@ -26,6 +26,7 @@ graph TB
         bazarr["Bazarr"]
         jellyseerr["Jellyseerr<br>(Docker)"]
         dropservice["dropservice"]
+        examiga["EX-AMIGA API"]
         sshd["sshd"]
     end
 
@@ -42,6 +43,7 @@ graph TB
     nginx --> bazarr
     nginx --> jellyseerr
     nginx --> dropservice
+    nginx --> examiga
     sshd -.-> Internet
 
     prowlarr -.-> sonarr
@@ -78,6 +80,7 @@ map of how they fit together.
 | Bazarr | Subtitle manager for Sonarr/Radarr, `bazarr.sillyash.com` | [services/bazarr](services/bazarr/README.md) |
 | Jellyseerr | Request/discovery UI for Jellyfin, `jellyseerr.sillyash.com` — the one Docker-based service | [services/jellyseerr](services/jellyseerr/README.md) |
 | dropservice | Custom password-gated Flask file-upload service, `drop.sillyash.com` — own repo, included as a submodule | [services/dropservice](services/dropservice) |
+| EX-AMIGA API | Band site's Flask API, `api.examigaband.com` (frontend is on GitHub Pages) | [services/examiga](services/examiga/README.md) |
 | SSH | Remote shell access, `ssh.sillyash.com:22` (direct, not nginx-proxied) | [services/ssh](services/ssh/README.md) |
 | fail2ban | Bans IPs after repeated failed SSH/Transmission/*arr-login attempts | [services/fail2ban](services/fail2ban/README.md) |
 
@@ -105,6 +108,7 @@ README for config testing, cert renewal, torrent CLI, fail2ban ban/unban, etc.
 | [Bazarr](services/bazarr/README.md) | `sudo systemctl restart bazarr` | `systemctl status bazarr` | `journalctl -u bazarr -n 50` |
 | [Jellyseerr](services/jellyseerr/README.md) | `sudo docker restart jellyseerr` | `sudo docker ps --filter name=jellyseerr` | `sudo docker logs jellyseerr -f` |
 | [dropservice](services/systemd/README.md) | `sudo systemctl restart drop` | `systemctl status drop` | `journalctl -u drop -f` |
+| [EX-AMIGA API](services/examiga/README.md) | `sudo systemctl restart examiga-api` | `systemctl status examiga-api` | `journalctl -u examiga-api -f` |
 | [SSH](services/ssh/README.md) | `sudo systemctl reload ssh` | `systemctl status ssh` | `journalctl -u ssh -n 50` |
 | [fail2ban](services/fail2ban/README.md) | `sudo systemctl restart fail2ban` | `fail2ban-client status` | `journalctl -u fail2ban -n 50` |
 
