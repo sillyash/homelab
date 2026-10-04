@@ -43,7 +43,8 @@ install -m 600 /dev/null /etc/letsencrypt/cloudflare.ini
 # then fill in dns_cloudflare_api_token = <token>
 ```
 
-The token needs only **Zone → DNS → Edit**, scoped to the `sillyash.com` zone.
+The token needs only **Zone → DNS → Edit**, scoped to the `sillyash.com` and
+`examigaband.com` zones.
 
 ## Issuing a cert
 
@@ -89,6 +90,7 @@ systemctl status certbot.timer
 ## Current certificates
 
 - `drop.sillyash.com` — used by [dropservice](../dropservice/README.md)
+- `api.examigaband.com` — used by the [EX-AMIGA API](../examiga/README.md)
 - `jelly.sillyash.com` (covers `jelly.sillyash.com`, `transmission.sillyash.com`,
   `sonarr.sillyash.com`, `radarr.sillyash.com`, `prowlarr.sillyash.com`,
   `bazarr.sillyash.com`, and `jellyseerr.sillyash.com` as SANs — one cert for the
