@@ -4,6 +4,8 @@ BitTorrent client, web UI reachable at `https://transmission.sillyash.com` via t
 [nginx](../nginx/README.md) reverse proxy (nginx handles TLS; the daemon itself
 listens on plain HTTP on `9091`).
 
+> **Exposure:** Cloudflare Tunnel + Access — no longer on public `:443`; nginx serves it on `127.0.0.1:8443` for cloudflared only. See [cloudflared](../cloudflared/README.md).
+
 ## Architecture
 
 ```mermaid

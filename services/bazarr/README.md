@@ -6,6 +6,8 @@ subtitles as new episodes/movies are imported. Reachable at
 `https://bazarr.sillyash.com` via the [nginx](../nginx/README.md) reverse proxy
 (nginx handles TLS; Bazarr itself listens on plain HTTP on `6767`).
 
+> **Exposure:** Cloudflare Tunnel + Access — no longer on public `:443`; nginx serves it on `127.0.0.1:8443` for cloudflared only. See [cloudflared](../cloudflared/README.md).
+
 ## Architecture
 
 ```mermaid

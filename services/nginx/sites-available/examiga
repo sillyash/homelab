@@ -1,11 +1,5 @@
 server {
-    listen 80;
-    server_name api.examigaband.com;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
+    listen 127.0.0.1:8443 ssl;
     server_name api.examigaband.com;
 
     ssl_certificate     /etc/letsencrypt/live/api.examigaband.com/fullchain.pem;
