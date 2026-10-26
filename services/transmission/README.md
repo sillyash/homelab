@@ -10,15 +10,17 @@ listens on plain HTTP on `9091`).
 
 ```mermaid
 graph LR
-    Internet -->|"HTTPS + RPC auth"| nginx["nginx<br>rate-limited"]
-    nginx --> transmission["Transmission :9091"]
+    Internet -->|HTTPS| access["Cloudflare Access<br>email one-time PIN"]
+    access -->|tunnel| nginx["nginx 127.0.0.1:8443<br>rate-limited"]
+    nginx -->|RPC auth| transmission["Transmission :9091"]
     transmission --> downloads["/var/lib/transmission-daemon/downloads"]
-    bots(("bots probing<br>the login prompt")) -.->|throttled + banned| nginx
-    f2b["fail2ban<br>transmission-rpc jail"] -.->|bans repeat 401s| Internet
 ```
 
-Kept intentionally public so torrents can be added remotely. The login prompt gets
-probed by bots constantly, so it's mitigated rather than moved behind a VPN:
+Reachable remotely so torrents can be added from anywhere. The RPC login prompt
+used to be probed by bots constantly; it's now layered:
+
+- **[Cloudflare Access](../cloudflared/README.md#cloudflare-access)** in front —
+  bots never reach the prompt without passing the email one-time PIN first.
 
 - **nginx rate limiting** ([`conf.d/rate-limit.conf`](../nginx/conf.d/rate-limit.conf),
   applied in the `transmission.sillyash.com` server block in
@@ -26,9 +28,9 @@ probed by bots constantly, so it's mitigated rather than moved behind a VPN:
   a burst of 5, plus a cap of 5 concurrent connections per IP. Throttles bots before
   they even reach Transmission; a human occasionally logging in to add a torrent is
   unaffected.
-- **[fail2ban](../fail2ban/README.md)'s `transmission-rpc` jail**: bans an IP for 2h
-  after 8 failed (HTTP 401) login attempts within 10 minutes, parsed from nginx's
-  access log.
+- **[fail2ban](../fail2ban/README.md)'s `transmission-rpc` jail** used to ban IPs
+  after repeated 401s; it's **disabled** since the tunnel, because traffic now
+  arrives from cloudflared on localhost and a firewall ban can't touch it.
 
 ## Install
 

@@ -1,10 +1,14 @@
 # fail2ban
 
 Bans IPs at the firewall after repeated failed attempts against a service, watching
-log files/journald for failure patterns. Shared infrastructure for three jails on
-this box: [SSH](../ssh/README.md), [Transmission's public RPC](../transmission/README.md)
-(also covers [Jellyseerr](../jellyseerr/README.md) — see below), and the
-[arr-stack](../sonarr/README.md) apps' web logins.
+log files/journald for failure patterns. Only the [SSH](../ssh/README.md) jail is
+active now. The two nginx-based jails ([Transmission's RPC](../transmission/README.md)
+/ [Jellyseerr](../jellyseerr/README.md) 401s, and the [arr-stack](../sonarr/README.md)
+web logins) are kept in the repo but **disabled**: those hosts moved behind the
+[Cloudflare Tunnel](../cloudflared/README.md), so their traffic arrives from
+cloudflared on `127.0.0.1` and an iptables ban on the real client IP can't block
+it. Cloudflare Access (on the admin UIs) and nginx's `limit_req` (which still sees
+real IPs via `CF-Connecting-IP`) cover that ground instead.
 
 ## Architecture
 
@@ -17,8 +21,8 @@ graph LR
 
     subgraph Jails
         sshd_jail["sshd<br>5 tries / 10m -> 1h ban"]
-        rpc_jail["transmission-rpc<br>8x 401 / 10m -> 2h ban"]
-        arr_jail["arr-login<br>8x failed login / 10m -> 2h ban"]
+        rpc_jail["transmission-rpc (disabled)<br>8x 401 / 10m -> 2h ban"]
+        arr_jail["arr-login (disabled)<br>8x failed login / 10m -> 2h ban"]
     end
 ```
 
@@ -31,7 +35,10 @@ systemctl enable --now fail2ban
 
 ## Config
 
-- [`jail.local`](jail.local) → `/etc/fail2ban/jail.local` — enables all three jails.
+- [`jail.local`](jail.local) → `/etc/fail2ban/jail.local` — enables `sshd`; the
+  `transmission-rpc` and `arr-login` jails are defined but `enabled = false` (see
+  above). Re-enabling them would only make sense for traffic that reaches nginx
+  directly on public `:443` again.
 - [`transmission-rpc.filter.conf`](transmission-rpc.filter.conf) →
   `/etc/fail2ban/filter.d/transmission-rpc.conf` — custom filter matching HTTP 401s
   in nginx's shared access log. Originally written for Transmission's RPC prompt;

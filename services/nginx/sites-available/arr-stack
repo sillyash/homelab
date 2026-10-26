@@ -8,8 +8,8 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/jelly.sillyash.com/privkey.pem;
 
     # Custom format logs the Location header, since Sonarr replies 302 with
-    # loginFailed=true on bad credentials rather than 401. Feeds fail2ban's
-    # arr-login jail.
+    # loginFailed=true on bad credentials rather than 401. Was fed to fail2ban's
+    # arr-login jail (now disabled — behind Cloudflare Access instead).
     access_log /var/log/nginx/arr-access.log arr_auth;
 
     location ~ ^/(login|api/system/account) {
