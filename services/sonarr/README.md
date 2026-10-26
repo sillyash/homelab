@@ -7,6 +7,8 @@ to refresh. Reachable at `https://sonarr.sillyash.com` via the
 [nginx](../nginx/README.md) reverse proxy (nginx handles TLS; Sonarr itself listens
 on plain HTTP on `8989`).
 
+> **Exposure:** Cloudflare Tunnel + Access — no longer on public `:443`; nginx serves it on `127.0.0.1:8443` for cloudflared only. See [cloudflared](../cloudflared/README.md).
+
 ## Architecture
 
 ```mermaid

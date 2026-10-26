@@ -5,7 +5,8 @@ challenge** (`python3-certbot-dns-cloudflare` plugin) instead of the HTTP-01
 challenge. DNS-01 is used because the box is on a residential connection behind a
 dynamic IP ([ddclient](../ddclient/README.md) keeps DNS pointed at it) — proving
 domain ownership via a DNS TXT record is simpler and more reliable than depending on
-inbound port 80 always reaching this exact machine.
+inbound port 80 always reaching this exact machine — and port 80 isn't forwarded to
+the box at all anymore (see the [Cloudflare Tunnel](../cloudflared/README.md) setup).
 
 ## Architecture
 

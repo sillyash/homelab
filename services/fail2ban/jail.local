@@ -7,7 +7,9 @@ findtime = 10m
 bantime  = 1h
 
 [transmission-rpc]
-enabled  = true
+# Disabled: these hosts are now behind Cloudflare Tunnel + Access, so traffic
+# arrives from cloudflared on localhost and iptables bans can't block it.
+enabled  = false
 filter   = transmission-rpc
 port     = http,https
 logpath  = /var/log/nginx/access.log
@@ -16,7 +18,9 @@ findtime = 10m
 bantime  = 2h
 
 [arr-login]
-enabled  = true
+# Disabled: these hosts are now behind Cloudflare Tunnel + Access, so traffic
+# arrives from cloudflared on localhost and iptables bans can't block it.
+enabled  = false
 filter   = arr-login
 port     = http,https
 logpath  = /var/log/nginx/arr-access.log

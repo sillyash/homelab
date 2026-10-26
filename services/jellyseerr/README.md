@@ -6,9 +6,12 @@ requests flow through to [Sonarr](../sonarr/README.md)/[Radarr](../radarr/README
 automatically. Reachable at `https://jellyseerr.sillyash.com` via the
 [nginx](../nginx/README.md) reverse proxy.
 
-**The one intentional exception to this box's bare-metal/systemd convention** — runs
-as a Docker container rather than an apt package, scoped to just this one service
-(Docker itself was already installed on the box, undocumented, before this).
+> **Exposure:** Cloudflare Tunnel (public, no Access) — no longer on public `:443`; nginx serves it on `127.0.0.1:8443` for cloudflared only. See [cloudflared](../cloudflared/README.md).
+
+**An intentional exception to this box's bare-metal/systemd convention** — runs
+as a Docker container rather than an apt package (Docker itself was already
+installed on the box, undocumented, before this). [cloudflared](../cloudflared/README.md)
+is the only other Docker-based service.
 
 ## Architecture
 
@@ -41,7 +44,7 @@ sudo docker run -d \
 Notes on the flags:
 
 - `-p 127.0.0.1:5055:5055` — bound to localhost only, same exposure model as every
-  other service here; nginx is the only public path in.
+  other service here; nginx (reached through the Cloudflare Tunnel) is the only way in.
 - `--add-host=host.docker.internal:host-gateway` — **required**. The container has
   its own network namespace, so `127.0.0.1` inside it refers to the container
   itself, not the host — Jellyseerr can't reach Jellyfin/Sonarr/Radarr (which all

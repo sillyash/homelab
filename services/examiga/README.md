@@ -6,13 +6,15 @@ workflow). Only the Flask API runs here, at `api.examigaband.com`.
 
 ## DNS (Cloudflare, `examigaband.com` zone)
 
-All records are **DNS only** (grey cloud). GitHub can't issue its cert behind the proxy.
+The GitHub Pages records are **DNS only** (grey cloud) — GitHub can't issue its cert
+behind the proxy. `api` is the exception: it's a [Cloudflare Tunnel](../cloudflared/README.md)
+route, created from the tunnel's Public Hostnames tab (proxied, orange cloud).
 
 | Type | Name | Content |
 |---|---|---|
 | A | `@` | `185.199.108.153`, `.109.153`, `.110.153`, `.111.153` (4 records) |
 | CNAME | `www` | `sillyash.github.io` |
-| CNAME | `api` | `jelly.sillyash.com` (ddclient keeps that one current) |
+| CNAME | `api` | `<tunnel-id>.cfargotunnel.com` (managed by the tunnel route) |
 | TXT | `_github-pages-challenge-sillyash` | value from GitHub → Settings → Pages |
 
 ## Deploy

@@ -11,10 +11,11 @@ publicly reachable as subdomains of `sillyash.com` (Cloudflare-managed DNS).
 ```mermaid
 graph TB
     Internet[Internet]
-    Cloudflare["Cloudflare DNS"]
+    Cloudflare["Cloudflare<br>DNS + Tunnel + Access"]
 
     subgraph Pi["Raspberry Pi 5 — Debian 12"]
         ddclient["ddclient"]
+        cloudflared["cloudflared<br>(Docker)"]
         certbot["certbot"]
         nginx["nginx"]
         jellyfin["Jellyfin"]
@@ -30,8 +31,11 @@ graph TB
         sshd["sshd"]
     end
 
-    Internet --> Cloudflare --> Pi
+    Internet --> Cloudflare
+    Internet -->|"443: jelly, drop"| nginx
     ddclient --> Cloudflare
+    cloudflared <-.->|tunnel| Cloudflare
+    cloudflared -->|"127.0.0.1:8443"| nginx
     certbot --> Cloudflare
     certbot --> nginx
 
@@ -64,13 +68,27 @@ graph TB
 Each service's own README below has a more detailed diagram — this one is just the
 map of how they fit together.
 
+### How things are reached from the internet
+
+| Path | Hostnames | Notes |
+|---|---|---|
+| [Cloudflare Tunnel](services/cloudflared/README.md) + **Access** login | sonarr, radarr, prowlarr, bazarr, transmission | email one-time PIN in front of the app's own login |
+| Cloudflare Tunnel, public | jellyseerr, `api.examigaband.com` | app's own auth only |
+| Router port-forward 443 → nginx | jelly, drop | not tunneled: video ToS / 100 MB upload cap |
+| Router port-forward 22 → sshd | ssh | key-only + fail2ban |
+
+Port 80 isn't forwarded. Tunneled vhosts only listen on nginx's local
+`127.0.0.1:8443`, so they can't be reached by aiming at the home IP — see
+[nginx](services/nginx/README.md#two-front-doors-public-443-vs-tunnel-only-8443).
+
 ## Services
 
 | Service | What | Docs |
 |---|---|---|
 | nginx | Reverse proxy + TLS termination for every HTTPS host | [services/nginx](services/nginx/README.md) |
 | certbot | Let's Encrypt certs via Cloudflare DNS-01 challenge | [services/certbot](services/certbot/README.md) |
-| ddclient | Keeps Cloudflare DNS pointed at this box's dynamic public IP | [services/ddclient](services/ddclient/README.md) |
+| ddclient | Keeps the direct-path A records (jelly, drop, ssh) pointed at this box's dynamic public IP | [services/ddclient](services/ddclient/README.md) |
+| cloudflared | Cloudflare Tunnel connector (Docker), remotely managed — hostnames routed from the dashboard | [services/cloudflared](services/cloudflared/README.md) |
 | Jellyfin | Media server, `jelly.sillyash.com` | [services/jellyfin](services/jellyfin/README.md) |
 | Transmission | BitTorrent client, `transmission.sillyash.com` | [services/transmission](services/transmission/README.md) |
 | NZBGet | Usenet downloader, connected to Eweka, no public host | [services/nzbget](services/nzbget/README.md) |
@@ -78,11 +96,11 @@ map of how they fit together.
 | Sonarr | TV series PVR, `sonarr.sillyash.com` | [services/sonarr](services/sonarr/README.md) |
 | Radarr | Movie PVR, `radarr.sillyash.com` | [services/radarr](services/radarr/README.md) |
 | Bazarr | Subtitle manager for Sonarr/Radarr, `bazarr.sillyash.com` | [services/bazarr](services/bazarr/README.md) |
-| Jellyseerr | Request/discovery UI for Jellyfin, `jellyseerr.sillyash.com` — the one Docker-based service | [services/jellyseerr](services/jellyseerr/README.md) |
+| Jellyseerr | Request/discovery UI for Jellyfin, `jellyseerr.sillyash.com` — Docker-based | [services/jellyseerr](services/jellyseerr/README.md) |
 | dropservice | Custom password-gated Flask file-upload service, `drop.sillyash.com` — own repo, included as a submodule | [services/dropservice](services/dropservice) |
 | EX-AMIGA API | Band site's Flask API, `api.examigaband.com` (frontend is on GitHub Pages) | [services/examiga](services/examiga/README.md) |
 | SSH | Remote shell access, `ssh.sillyash.com:22` (direct, not nginx-proxied) | [services/ssh](services/ssh/README.md) |
-| fail2ban | Bans IPs after repeated failed SSH/Transmission/*arr-login attempts | [services/fail2ban](services/fail2ban/README.md) |
+| fail2ban | Bans IPs after repeated failed SSH attempts (nginx-based jails disabled since the tunnel) | [services/fail2ban](services/fail2ban/README.md) |
 
 Config snippets and systemd units in this repo are the real files from the running
 box, with all secrets (API tokens, passwords) redacted or replaced by `.example`
@@ -99,6 +117,7 @@ README for config testing, cert renewal, torrent CLI, fail2ban ban/unban, etc.
 | [nginx](services/nginx/README.md) | `sudo systemctl reload nginx` | `systemctl status nginx` | `sudo tail -f /var/log/nginx/access.log` |
 | [certbot](services/certbot/README.md) | n/a — timer-driven | `systemctl status certbot.timer` | `journalctl -u certbot -n 50` |
 | [ddclient](services/ddclient/README.md) | `sudo systemctl restart ddclient` | `systemctl status ddclient` | `journalctl -u ddclient -n 50` |
+| [cloudflared](services/cloudflared/README.md) | `sudo docker restart cloudflared` | `sudo docker ps --filter name=cloudflared` | `sudo docker logs cloudflared -f` |
 | [Jellyfin](services/jellyfin/README.md) | `sudo systemctl restart jellyfin` | `systemctl status jellyfin` | `journalctl -u jellyfin -f` |
 | [Transmission](services/transmission/README.md) | `sudo systemctl restart transmission-daemon` | `systemctl status transmission-daemon` | `journalctl -u transmission-daemon -n 50` |
 | [NZBGet](services/nzbget/README.md) | `sudo systemctl restart nzbget` | `systemctl status nzbget` | `journalctl -u nzbget -n 50` |
