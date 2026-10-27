@@ -3,10 +3,17 @@ Description=EX-AMIGA API
 After=network.target
 
 [Service]
-WorkingDirectory=/opt/examiga-web/api
-ExecStart=/opt/examiga-web/api/.venv/bin/gunicorn --bind 127.0.0.1:5000 app:app
+WorkingDirectory=/opt/examiga-api
+Environment=EXAMIGA_DB_PATH=/var/lib/examiga/examiga.db
+ExecStart=/opt/examiga-api/.venv/bin/gunicorn --bind 127.0.0.1:5000 app:app
 Restart=always
 User=www-data
+# Creates /var/lib/examiga owned by www-data: the only place the app can write.
+StateDirectory=examiga
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
 
 [Install]
 WantedBy=multi-user.target

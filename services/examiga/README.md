@@ -17,21 +17,24 @@ route, created from the tunnel's Public Hostnames tab (proxied, orange cloud).
 | CNAME | `api` | `<tunnel-id>.cfargotunnel.com` (managed by the tunnel route) |
 | TXT | `_github-pages-challenge-sillyash` | value from GitHub → Settings → Pages |
 
+## Layout
+
+Same split as dropservice: you own the git checkout, root owns the deployed copy,
+and the service can only write its DB.
+
+| Path | Owner | What |
+|---|---|---|
+| `~/examiga-web` | you | git checkout: pull and edit here, never as root |
+| `/opt/examiga-api` | root | deployed copy of `api/` + `.venv` + uv's Python (`REVISION` = commit) |
+| `/var/lib/examiga/examiga.db` | www-data | SQLite DB (systemd `StateDirectory`, via `EXAMIGA_DB_PATH`) |
+
 ## Deploy
 
-From a homelab checkout on the Pi:
+First install, from a homelab checkout on the Pi:
 
 ```bash
-sudo git clone https://github.com/sillyash/examiga-web.git /opt/examiga-web
-sudo chown -R www-data: /opt/examiga-web
-# API needs Python >= 3.12 (Debian 12 has 3.11), so uv fetches its own. Keep uv's
-# files under /opt since www-data can't write to its home.
-(cd /opt/examiga-web/api && sudo -u www-data env \
-  UV_CACHE_DIR=/opt/examiga-web/.uv/cache UV_PYTHON_INSTALL_DIR=/opt/examiga-web/.uv/python \
-  uv sync)   # creates .venv with gunicorn
-
-sudo cp services/systemd/examiga-api.service /etc/systemd/system/
-sudo systemctl daemon-reload && sudo systemctl enable --now examiga-api
+git clone git@github.com:sillyash/examiga-web.git ~/examiga-web
+sudo services/examiga/deploy.sh --seed   # rsync api/, uv sync, install unit, seed
 
 sudo certbot certonly --dns-cloudflare \
   --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
@@ -41,6 +44,33 @@ sudo ln -s /etc/nginx/sites-available/examiga /etc/nginx/sites-enabled/examiga
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-The SQLite DB (`api/examiga.db`) lives next to the code and persists across restarts.
-To update, run `git pull` (plus the `uv sync` above if dependencies changed), then
-`sudo systemctl restart examiga-api`.
+`deploy.sh` refuses to deploy uncommitted changes in `api/`, and it reads git only as
+`$SUDO_USER`, so root never touches the repo.
+
+## Update
+
+```bash
+git -C ~/examiga-web pull
+sudo ~/homelab/services/examiga/deploy.sh
+```
+
+To change tour dates, edit `api/seed.py`, commit and push, pull on the Pi, then run
+`deploy.sh --seed`. Every seed run replaces the whole `tour_dates` table.
+
+Back up the DB with
+`sudo sqlite3 /var/lib/examiga/examiga.db ".backup /path/to/examiga-$(date +%F).db"`.
+
+## Migrating from the old `/opt/examiga-web` checkout
+
+The old setup was a `www-data`-owned git clone with the DB in `api/`. Moving to the new layout is a one-time step:
+
+```bash
+git clone git@github.com:sillyash/examiga-web.git ~/examiga-web
+sudo systemctl stop examiga-api
+sudo install -d -o www-data -g www-data /var/lib/examiga
+sudo cp -a /opt/examiga-web/api/examiga.db /var/lib/examiga/
+sudo mv /opt/examiga-web /opt/examiga-web.old   # rollback copy
+sudo ~/homelab/services/examiga/deploy.sh
+# once it checks out:
+sudo rm -rf /opt/examiga-web.old
+```
