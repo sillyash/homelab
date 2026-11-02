@@ -1,15 +1,22 @@
 [Unit]
-Description=EX-AMIGA API
+Description=EX-AMIGA API (Django: public API + content admin)
 After=network.target
 
 [Service]
 WorkingDirectory=/opt/examiga-api
-Environment=EXAMIGA_DB_PATH=/var/lib/examiga/examiga.db
-ExecStart=/opt/examiga-api/.venv/bin/gunicorn --bind 127.0.0.1:5000 app:app
+# Non-secret settings (installed from services/examiga/config.env) + the generated
+# EXAMIGA_SECRET_KEY (root-only, created once by deploy.sh).
+EnvironmentFile=/etc/examiga/config.env
+EnvironmentFile=/etc/examiga/secret.env
+# One worker: the shoutout rate limits live in process memory.
+ExecStart=/opt/examiga-api/.venv/bin/gunicorn --workers 1 --bind 127.0.0.1:5000 config.wsgi
 Restart=always
 User=www-data
 # Creates /var/lib/examiga owned by www-data: the only place the app can write.
 StateDirectory=examiga
+# The DB holds admin password hashes and sessions: keep it away from other users.
+StateDirectoryMode=0750
+UMask=0027
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes

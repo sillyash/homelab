@@ -1,3 +1,7 @@
+# EX-AMIGA: one Django/Gunicorn app on 127.0.0.1:5000, two tunnel-only hostnames.
+# Both are reached only through cloudflared, so CF-Connecting-IP is trustworthy.
+
+# Public API (no Cloudflare Access).
 server {
     listen 127.0.0.1:8443 ssl;
     server_name api.examigaband.com;
@@ -10,10 +14,45 @@ server {
     ssl_session_cache   shared:SSL:10m;
     ssl_session_timeout 1d;
 
+    # The admin only lives on admin.examigaband.com, behind Cloudflare Access.
+    location ^~ /admin/  { return 404; }
+    location ^~ /static/ { return 404; }
+
     location / {
         proxy_pass http://127.0.0.1:5000;
         proxy_set_header Host $host;
-        # The app's ProxyFix(x_for=1) reads this for the shoutout rate limit.
-        proxy_set_header X-Forwarded-For $remote_addr;
+        # Django builds https:// URLs (cursor `next` links) and skips its HTTPS redirect.
+        proxy_set_header X-Forwarded-Proto https;
+        # Real client IP for DRF's per-IP shoutout throttle ($remote_addr is cloudflared).
+        proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
+    }
+}
+
+# Content admin (Cloudflare Access `homelab-admin`, then Django login).
+server {
+    listen 127.0.0.1:8443 ssl;
+    server_name admin.examigaband.com;
+
+    ssl_certificate     /etc/letsencrypt/live/admin.examigaband.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/admin.examigaband.com/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    location = / { return 302 /admin/; }
+
+    # collectstatic output (EXAMIGA_ADMIN_STATIC_ROOT).
+    location /static/ {
+        alias /var/lib/examiga/staticfiles/;
+        expires 7d;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
     }
 }

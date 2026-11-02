@@ -21,7 +21,7 @@ graph LR
     edge <-->|"outbound QUIC tunnel<br>(no inbound ports)"| cloudflared["cloudflared container<br>--network host"]
     edge -.->|"Access login<br>(admin UIs)"| users
     cloudflared -->|"https://127.0.0.1:8443<br>+ SNI per hostname"| nginx["nginx<br>tunnel-only vhosts"]
-    nginx --> apps["Sonarr / Radarr / Prowlarr / Bazarr<br>Transmission / Jellyseerr / EX-AMIGA API"]
+    nginx --> apps["Sonarr / Radarr / Prowlarr / Bazarr<br>Transmission / Jellyseerr / EX-AMIGA API + admin"]
 ```
 
 ## Install
@@ -73,6 +73,7 @@ logging stay in one place:
 | transmission.sillyash.com | `https://127.0.0.1:8443` | transmission.sillyash.com | `homelab-admin` |
 | jellyseerr.sillyash.com | `https://127.0.0.1:8443` | jellyseerr.sillyash.com | — (public, own login) |
 | api.examigaband.com | `https://127.0.0.1:8443` | api.examigaband.com | — (public API) |
+| admin.examigaband.com | `https://127.0.0.1:8443` | admin.examigaband.com | `homelab-admin` |
 
 - **`127.0.0.1`, not `localhost`** — nginx's tunnel listener is IPv4-only;
   `localhost` can resolve to `::1` first.
