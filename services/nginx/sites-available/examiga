@@ -41,6 +41,8 @@ server {
     ssl_session_cache   shared:SSL:10m;
     ssl_session_timeout 1d;
 
+    # Relative redirects: nginx would otherwise add its internal :8443 port.
+    absolute_redirect off;
     location = / { return 302 /admin/; }
 
     # collectstatic output (EXAMIGA_ADMIN_STATIC_ROOT).
