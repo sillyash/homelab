@@ -18,9 +18,10 @@ Installed from the Debian repos (`apt install nginx`), config lives under
 | `bazarr.sillyash.com` | `arr-stack` (same file) | `127.0.0.1:8443` (tunnel) | `localhost:6767` (Bazarr) | `jelly.sillyash.com` |
 | `jellyseerr.sillyash.com` | `jellyseerr` | `127.0.0.1:8443` (tunnel) | `127.0.0.1:5055` (Jellyseerr, Docker) | `jelly.sillyash.com` |
 | `api.examigaband.com` | `examiga` | `127.0.0.1:8443` (tunnel) | `127.0.0.1:5000` (EX-AMIGA API, gunicorn) | `api.examigaband.com` |
+| `fiirefly-api.sillyash.com` | `fiirefly` | `127.0.0.1:8443` (tunnel) | `127.0.0.1:5001` (FiiReFLY API, gunicorn) | `fiirefly-api.sillyash.com` |
 
 All terminate TLS with certs from [certbot](../certbot/README.md). The
-`jelly.sillyash.com` cert covers every `sillyash.com` host above except `drop` as
+`jelly.sillyash.com` cert covers every `sillyash.com` host above except `drop` and `fiirefly-api` as
 SANs (one cert, one renewal, one nginx reload).
 
 ### Two front doors: public `:443` vs tunnel-only `:8443`
@@ -56,6 +57,7 @@ graph LR
     jellyseerr["Jellyseerr :5055<br>(Docker)"]
     dropservice["dropservice :8080"]
     examiga["EX-AMIGA API :5000"]
+    fiirefly["FiiReFLY API :5001"]
 
     clients -->|"HTTPS :443<br>jelly, drop"| nginx
     clients -->|"HTTPS via Cloudflare<br>(+ Access on admin UIs)"| cloudflared
@@ -69,6 +71,7 @@ graph LR
     nginx -->|proxy_pass| jellyseerr
     nginx -->|proxy_pass| dropservice
     nginx -->|proxy_pass| examiga
+    nginx -->|proxy_pass| fiirefly
 ```
 
 ## Files in this repo

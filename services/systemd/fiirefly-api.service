@@ -1,0 +1,26 @@
+[Unit]
+Description=FiiReFLY API (Django: public API + admin)
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/fiirefly-api
+# Non-secret settings (installed from services/fiirefly/config.env) + secrets
+# (FIIREFLY_SECRET_KEY generated once by deploy.sh, Arise Connect client filled by hand).
+EnvironmentFile=/etc/fiirefly/config.env
+EnvironmentFile=/etc/fiirefly/secret.env
+# One worker: the livre d'or throttle lives in process memory (LocMem cache).
+ExecStart=/opt/fiirefly-api/.venv/bin/gunicorn --workers 1 --bind 127.0.0.1:5001 fiirefly_api.wsgi
+Restart=always
+User=www-data
+# Creates /var/lib/fiirefly owned by www-data: the only place the app can write.
+StateDirectory=fiirefly
+# The DB holds admin password hashes and sessions: keep it away from other users.
+StateDirectoryMode=0750
+UMask=0027
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target
