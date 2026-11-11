@@ -8,6 +8,8 @@ WorkingDirectory=/opt/fiirefly-api
 # (FIIREFLY_SECRET_KEY generated once by deploy.sh, Arise Connect client filled by hand).
 EnvironmentFile=/etc/fiirefly/config.env
 EnvironmentFile=/etc/fiirefly/secret.env
+# The system locale is latin-1 (LANG=en_US): force UTF-8 for I/O and logs.
+Environment=PYTHONUTF8=1
 # One worker: the livre d'or throttle lives in process memory (LocMem cache).
 ExecStart=/opt/fiirefly-api/.venv/bin/gunicorn --workers 1 --bind 127.0.0.1:5001 fiirefly_api.wsgi
 Restart=always
