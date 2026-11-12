@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Run a Django management command against the deployed FiiReFLY API, as the service
+# user and with the service's environment.
+#
+#   sudo ./manage.sh createsuperuser
+#   sudo ./manage.sh changepassword <user>
+set -euo pipefail
+[[ $EUID -eq 0 ]] || { echo "Run as root: sudo $0 $*" >&2; exit 1; }
+cd /opt/fiirefly-api
+# PYTHONUTF8: the Pi's locale is LANG=en_US (latin-1), which can't print the French
+# prompts' typographic apostrophes (createsuperuser crashed with UnicodeEncodeError).
+# shellcheck disable=SC2046  # values have no spaces (see config.env)
+exec sudo -u www-data env PYTHONUTF8=1 $(grep -hv '^\s*#' /etc/fiirefly/config.env /etc/fiirefly/secret.env) \
+    .venv/bin/python manage.py "$@"
