@@ -8,7 +8,7 @@
 set -euo pipefail
 
 # ── Config ────────────────────────────────────────────────────────────────────
-SRC="${SRC:-/home/${SUDO_USER:-}/Krokodiile}"
+SRC="${SRC:-/home/${SUDO_USER:-}/FiiReFLY}"
 APP_DIR="/opt/fiirefly-api"
 ETC_DIR="/etc/fiirefly"
 STATE_DIR="/var/lib/fiirefly"
