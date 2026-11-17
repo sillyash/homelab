@@ -74,6 +74,7 @@ logging stay in one place:
 | jellyseerr.sillyash.com | `https://127.0.0.1:8443` | jellyseerr.sillyash.com | — (public, own login) |
 | api.examigaband.com | `https://127.0.0.1:8443` | api.examigaband.com | — (public API) |
 | admin.examigaband.com | `https://127.0.0.1:8443` | admin.examigaband.com | `homelab-admin` |
+| fiirefly-api.sillyash.com | `https://127.0.0.1:8443` | fiirefly-api.sillyash.com | — (public API + Django admin) |
 
 - **`127.0.0.1`, not `localhost`** — nginx's tunnel listener is IPv4-only;
   `localhost` can resolve to `::1` first.

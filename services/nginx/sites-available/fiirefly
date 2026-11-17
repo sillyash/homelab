@@ -1,0 +1,43 @@
+# FiiReFLY API: Django/Gunicorn on 127.0.0.1:5001, tunnel-only hostname.
+# Frontend is on GitHub Pages (https://sillyash.com/Krokodiile/).
+# Reached only through cloudflared, so $remote_addr is the real client
+# (conf.d/cloudflared-realip.conf).
+server {
+    listen 127.0.0.1:8443 ssl;
+    server_name fiirefly-api.sillyash.com;
+
+    ssl_certificate     /etc/letsencrypt/live/fiirefly-api.sillyash.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/fiirefly-api.sillyash.com/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    # Relative redirects: nginx would otherwise add its internal :8443 port.
+    absolute_redirect off;
+
+    # collectstatic output (FIIREFLY_STATIC_ROOT): admin CSS/JS.
+    location /static/ {
+        alias /var/lib/fiirefly/staticfiles/;
+        expires 7d;
+    }
+
+    # The admin is public (Django login only): slow down password guessing.
+    location = /admin/login/ {
+        limit_req zone=fiirefly_login burst=5 nodelay;
+
+        proxy_pass http://127.0.0.1:5001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:5001;
+        proxy_set_header Host $host;
+        # Django's SECURE_PROXY_SSL_HEADER: secure cookies + CSRF Origin check.
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+}

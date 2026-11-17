@@ -28,6 +28,7 @@ graph TB
         jellyseerr["Jellyseerr<br>(Docker)"]
         dropservice["dropservice"]
         examiga["EX-AMIGA API"]
+        fiirefly["FiiReFLY API"]
         sshd["sshd"]
     end
 
@@ -48,6 +49,7 @@ graph TB
     nginx --> jellyseerr
     nginx --> dropservice
     nginx --> examiga
+    nginx --> fiirefly
     sshd -.-> Internet
 
     prowlarr -.-> sonarr
@@ -73,7 +75,7 @@ map of how they fit together.
 | Path | Hostnames | Notes |
 |---|---|---|
 | [Cloudflare Tunnel](services/cloudflared/README.md) + **Access** login | sonarr, radarr, prowlarr, bazarr, transmission | email one-time PIN in front of the app's own login |
-| Cloudflare Tunnel, public | jellyseerr, `api.examigaband.com` | app's own auth only |
+| Cloudflare Tunnel, public | jellyseerr, `api.examigaband.com`, fiirefly-api | app's own auth only |
 | Router port-forward 443 → nginx | jelly, drop | not tunneled: video ToS / 100 MB upload cap |
 | Router port-forward 22 → sshd | ssh | key-only + fail2ban |
 
@@ -99,6 +101,7 @@ Port 80 isn't forwarded. Tunneled vhosts only listen on nginx's local
 | Jellyseerr | Request/discovery UI for Jellyfin, `jellyseerr.sillyash.com` — Docker-based | [services/jellyseerr](services/jellyseerr/README.md) |
 | dropservice | Custom password-gated Flask file-upload service, `drop.sillyash.com` — own repo, included as a submodule | [services/dropservice](services/dropservice) |
 | EX-AMIGA API | Band site's Flask API, `api.examigaband.com` (frontend is on GitHub Pages) | [services/examiga](services/examiga/README.md) |
+| FiiReFLY API | Django API for the FiiReFLY site, `fiirefly-api.sillyash.com` (frontend is on GitHub Pages) | [services/fiirefly](services/fiirefly/README.md) |
 | SSH | Remote shell access, `ssh.sillyash.com:22` (direct, not nginx-proxied) | [services/ssh](services/ssh/README.md) |
 | fail2ban | Bans IPs after repeated failed SSH attempts (nginx-based jails disabled since the tunnel) | [services/fail2ban](services/fail2ban/README.md) |
 
@@ -128,6 +131,7 @@ README for config testing, cert renewal, torrent CLI, fail2ban ban/unban, etc.
 | [Jellyseerr](services/jellyseerr/README.md) | `sudo docker restart jellyseerr` | `sudo docker ps --filter name=jellyseerr` | `sudo docker logs jellyseerr -f` |
 | [dropservice](services/systemd/README.md) | `sudo systemctl restart drop` | `systemctl status drop` | `journalctl -u drop -f` |
 | [EX-AMIGA API](services/examiga/README.md) | `sudo systemctl restart examiga-api` | `systemctl status examiga-api` | `journalctl -u examiga-api -f` |
+| [FiiReFLY API](services/fiirefly/README.md) | `sudo systemctl restart fiirefly-api` | `systemctl status fiirefly-api` | `journalctl -u fiirefly-api -f` |
 | [SSH](services/ssh/README.md) | `sudo systemctl reload ssh` | `systemctl status ssh` | `journalctl -u ssh -n 50` |
 | [fail2ban](services/fail2ban/README.md) | `sudo systemctl restart fail2ban` | `fail2ban-client status` | `journalctl -u fail2ban -n 50` |
 
