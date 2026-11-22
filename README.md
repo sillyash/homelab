@@ -101,7 +101,7 @@ Port 80 isn't forwarded. Tunneled vhosts only listen on nginx's local
 | Jellyseerr | Request/discovery UI for Jellyfin, `jellyseerr.sillyash.com` — Docker-based | [services/jellyseerr](services/jellyseerr/README.md) |
 | dropservice | Custom password-gated Flask file-upload service, `drop.sillyash.com` — own repo, included as a submodule | [services/dropservice](services/dropservice) |
 | EX-AMIGA API | Band site's Flask API, `api.examigaband.com` (frontend is on GitHub Pages) | [services/examiga](services/examiga/README.md) |
-| FiiReFLY API | Django API for the FiiReFLY site, `fiirefly-api.sillyash.com` (frontend is on GitHub Pages) | [services/fiirefly](services/fiirefly/README.md) |
+| FiiReFLY API | Django API for the FiiReFLY site, `fiirefly-api.sillyash.com` (frontend is on `fiirefly.iiens.net`) | [services/fiirefly](services/fiirefly/README.md) |
 | SSH | Remote shell access, `ssh.sillyash.com:22` (direct, not nginx-proxied) | [services/ssh](services/ssh/README.md) |
 | fail2ban | Bans IPs after repeated failed SSH attempts (nginx-based jails disabled since the tunnel) | [services/fail2ban](services/fail2ban/README.md) |
 

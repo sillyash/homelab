@@ -1,5 +1,5 @@
 # FiiReFLY API: Django/Gunicorn on 127.0.0.1:5001, tunnel-only hostname.
-# Frontend is on GitHub Pages (https://sillyash.com/Krokodiile/).
+# Frontend is static on the school's personal pages (https://fiirefly.iiens.net).
 # Reached only through cloudflared, so $remote_addr is the real client
 # (conf.d/cloudflared-realip.conf).
 server {
@@ -14,12 +14,21 @@ server {
     ssl_session_cache   shared:SSL:10m;
     ssl_session_timeout 1d;
 
+    # photos trombi : nginx coupe a 1m par defaut, les photos de tel brutes font 20-30m
+    client_max_body_size 40m;
+
     # Relative redirects: nginx would otherwise add its internal :8443 port.
     absolute_redirect off;
 
     # collectstatic output (FIIREFLY_STATIC_ROOT): admin CSS/JS.
     location /static/ {
         alias /var/lib/fiirefly/staticfiles/;
+        expires 7d;
+    }
+
+    # uploads (photos trombi, FIIREFLY_MEDIA_ROOT), sinon 404 sur les photos
+    location /media/ {
+        alias /var/lib/fiirefly/media/;
         expires 7d;
     }
 

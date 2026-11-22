@@ -11,13 +11,14 @@ EnvironmentFile=/etc/fiirefly/secret.env
 # The system locale is latin-1 (LANG=en_US): force UTF-8 for I/O and logs.
 Environment=PYTHONUTF8=1
 # One worker: the livre d'or throttle lives in process memory (LocMem cache).
-ExecStart=/opt/fiirefly-api/.venv/bin/gunicorn --workers 1 --bind 127.0.0.1:5001 fiirefly_api.wsgi
+ExecStart=/opt/fiirefly-api/.venv/bin/gunicorn --workers 1 --bind 127.0.0.1:5001 --no-control-socket fiirefly_api.wsgi
 Restart=always
 User=www-data
 # Creates /var/lib/fiirefly owned by www-data: the only place the app can write.
 StateDirectory=fiirefly
 # The DB holds admin password hashes and sessions: keep it away from other users.
 StateDirectoryMode=0750
+LogsDirectory=fiirefly
 UMask=0027
 NoNewPrivileges=yes
 ProtectSystem=strict
