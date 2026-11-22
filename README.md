@@ -29,6 +29,7 @@ graph TB
         dropservice["dropservice"]
         examiga["EX-AMIGA API"]
         fiirefly["FiiReFLY API"]
+        fiireflybot["FiiReFLY bot<br>(Discord + leaderboard)"]
         sshd["sshd"]
     end
 
@@ -50,6 +51,7 @@ graph TB
     nginx --> dropservice
     nginx --> examiga
     nginx --> fiirefly
+    nginx --> fiireflybot
     sshd -.-> Internet
 
     prowlarr -.-> sonarr
@@ -75,7 +77,7 @@ map of how they fit together.
 | Path | Hostnames | Notes |
 |---|---|---|
 | [Cloudflare Tunnel](services/cloudflared/README.md) + **Access** login | sonarr, radarr, prowlarr, bazarr, transmission | email one-time PIN in front of the app's own login |
-| Cloudflare Tunnel, public | jellyseerr, `api.examigaband.com`, fiirefly-api | app's own auth only |
+| Cloudflare Tunnel, public | jellyseerr, `api.examigaband.com`, fiirefly-api, fiirefly-bot | app's own auth only |
 | Router port-forward 443 → nginx | jelly, drop | not tunneled: video ToS / 100 MB upload cap |
 | Router port-forward 22 → sshd | ssh | key-only + fail2ban |
 
@@ -102,6 +104,7 @@ Port 80 isn't forwarded. Tunneled vhosts only listen on nginx's local
 | dropservice | Custom password-gated Flask file-upload service, `drop.sillyash.com` — own repo, included as a submodule | [services/dropservice](services/dropservice) |
 | EX-AMIGA API | Band site's Flask API, `api.examigaband.com` (frontend is on GitHub Pages) | [services/examiga](services/examiga/README.md) |
 | FiiReFLY API | Django API for the FiiReFLY site, `fiirefly-api.sillyash.com` (frontend is on `fiirefly.iiens.net`) | [services/fiirefly](services/fiirefly/README.md) |
+| FiiReFLY bot | Discord idle-game bot + its read-only leaderboard API, `fiirefly-bot.sillyash.com` | [services/fiirefly-bot](services/fiirefly-bot/README.md) |
 | SSH | Remote shell access, `ssh.sillyash.com:22` (direct, not nginx-proxied) | [services/ssh](services/ssh/README.md) |
 | fail2ban | Bans IPs after repeated failed SSH attempts (nginx-based jails disabled since the tunnel) | [services/fail2ban](services/fail2ban/README.md) |
 
@@ -132,6 +135,7 @@ README for config testing, cert renewal, torrent CLI, fail2ban ban/unban, etc.
 | [dropservice](services/systemd/README.md) | `sudo systemctl restart drop` | `systemctl status drop` | `journalctl -u drop -f` |
 | [EX-AMIGA API](services/examiga/README.md) | `sudo systemctl restart examiga-api` | `systemctl status examiga-api` | `journalctl -u examiga-api -f` |
 | [FiiReFLY API](services/fiirefly/README.md) | `sudo systemctl restart fiirefly-api` | `systemctl status fiirefly-api` | `journalctl -u fiirefly-api -f` |
+| [FiiReFLY bot](services/fiirefly-bot/README.md) | `sudo systemctl restart fiirefly-bot` | `systemctl status fiirefly-bot` | `sudo tail -f /var/lib/fiirefly-bot/discord.log` |
 | [SSH](services/ssh/README.md) | `sudo systemctl reload ssh` | `systemctl status ssh` | `journalctl -u ssh -n 50` |
 | [fail2ban](services/fail2ban/README.md) | `sudo systemctl restart fail2ban` | `fail2ban-client status` | `journalctl -u fail2ban -n 50` |
 

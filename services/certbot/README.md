@@ -93,6 +93,7 @@ systemctl status certbot.timer
 - `drop.sillyash.com` — used by [dropservice](../dropservice/README.md)
 - `api.examigaband.com` — used by the [EX-AMIGA API](../examiga/README.md)
 - `fiirefly-api.sillyash.com` — used by the [FiiReFLY API](../fiirefly/README.md)
+- `fiirefly-bot.sillyash.com` — used by the [FiiReFLY bot](../fiirefly-bot/README.md)'s leaderboard API
 - `jelly.sillyash.com` (covers `jelly.sillyash.com`, `transmission.sillyash.com`,
   `sonarr.sillyash.com`, `radarr.sillyash.com`, `prowlarr.sillyash.com`,
   `bazarr.sillyash.com`, and `jellyseerr.sillyash.com` as SANs — one cert for the

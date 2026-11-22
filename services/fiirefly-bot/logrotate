@@ -1,0 +1,12 @@
+# Installed to /etc/logrotate.d/fiirefly-bot by deploy.sh.
+# The bot logs discord.py at DEBUG level into its working directory and only truncates
+# the file on restart: keep it from filling the SD card.
+/var/lib/fiirefly-bot/discord.log {
+    size 20M
+    rotate 3
+    compress
+    missingok
+    notifempty
+    copytruncate
+    su www-data www-data
+}

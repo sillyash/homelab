@@ -1,0 +1,29 @@
+# FiiReFLY bot's read-only leaderboard API (aiohttp, inside the Discord bot process)
+# on 127.0.0.1:5002, tunnel-only hostname. Read by the frontend at https://fiirefly.iiens.net.
+# Reached only through cloudflared, so $remote_addr is the real client
+# (conf.d/cloudflared-realip.conf).
+server {
+    listen 127.0.0.1:8443 ssl;
+    server_name fiirefly-bot.sillyash.com;
+
+    ssl_certificate     /etc/letsencrypt/live/fiirefly-bot.sillyash.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/fiirefly-bot.sillyash.com/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    # Relative redirects: nginx would otherwise add its internal :8443 port.
+    absolute_redirect off;
+
+    # Every leaderboard request hits SQLite: don't let one client hammer it.
+    location / {
+        limit_req zone=fiirefly_bot_api burst=20 nodelay;
+
+        proxy_pass http://127.0.0.1:5002;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+}
