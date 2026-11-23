@@ -1,0 +1,32 @@
+[Unit]
+Description=FiiReFLY Discord bot (+ read-only leaderboard API)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+# The bot writes firefly.db and discord.log to its working directory: point it at
+# the state directory, the code stays read-only in /opt/fiirefly-bot.
+WorkingDirectory=/var/lib/fiirefly-bot
+# Non-secret settings (installed from services/fiirefly-bot/config.env) + the
+# Discord token (filled by hand in secret.env).
+EnvironmentFile=/etc/fiirefly-bot/config.env
+EnvironmentFile=/etc/fiirefly-bot/secret.env
+# The system locale is latin-1 (LANG=en_US): force UTF-8 for I/O and logs.
+Environment=PYTHONUTF8=1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/fiirefly-bot/.venv/bin/python /opt/fiirefly-bot/main.py
+Restart=always
+# Don't hammer Discord's login if the token is wrong.
+RestartSec=10
+User=www-data
+# Creates /var/lib/fiirefly-bot owned by www-data: the only place the bot can write.
+StateDirectory=fiirefly-bot
+StateDirectoryMode=0750
+UMask=0027
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

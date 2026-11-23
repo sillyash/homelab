@@ -1,14 +1,20 @@
 # FiiReFLY
 
-Django REST API for the FiiReFLY site ([sillyash/Krokodiile](https://github.com/sillyash/Krokodiile),
-`api/`). The frontend is on GitHub Pages at `https://sillyash.com/Krokodiile/`
-(deployed by the repo's Actions workflow on version tags). The API runs here at
-`fiirefly-api.sillyash.com`: one Gunicorn service, one tunnel-only nginx vhost.
+Django REST API for the FiiReFLY site ([sillyash/FiiReFLY](https://github.com/sillyash/FiiReFLY),
+`api/`). The frontend is static, on the school's personal pages at
+`https://fiirefly.iiens.net` (see [Frontend](#frontend-fiireflyiiensnet)). The API runs
+here at `fiirefly-api.sillyash.com`: one Gunicorn service, one tunnel-only nginx vhost.
 
 The hostname is `fiirefly-api`, not `api.fiirefly`: Cloudflare's free Universal SSL
 only covers one level of subdomain (`*.sillyash.com`), so a two-level name has no
-edge cert when proxied. It still shares the `sillyash.com` site with the frontend,
-which the session cookie (Arise Connect login) needs.
+edge cert when proxied.
+
+The frontend (`iiens.net`) and the API (`sillyash.com`) are different sites, so a
+session cookie would be third-party (blocked by Safari, partitioned by Firefox). The
+frontend authenticates with a DRF token instead: after the Arise login,
+`/auth/callback/` redirects to `https://fiirefly.iiens.net/#/connexion?code=...`, the
+frontend trades that 2-minute signed code for a token (`POST /auth/token/`) and sends
+`Authorization: Token ...`. Only the Django admin, on the API host, uses the session.
 
 ## DNS (Cloudflare, `sillyash.com` zone)
 
@@ -25,7 +31,7 @@ the service can only write its DB and static files.
 
 | Path | Owner | What |
 |---|---|---|
-| `~/Krokodiile` | you | git checkout: pull and edit here, never as root |
+| `~/FiiReFLY` | you | git checkout: pull and edit here, never as root |
 | `/opt/fiirefly-api` | root | deployed copy of `api/` + `.venv` (`REVISION` = commit) |
 | `/etc/fiirefly/config.env` | root | non-secret settings, copied from [`config.env`](config.env) on each deploy |
 | `/etc/fiirefly/secret.env` | root, 600 | `FIIREFLY_SECRET_KEY` (generated once by `deploy.sh`) + Arise Connect client id/secret (filled by hand), never overwritten |
@@ -40,7 +46,7 @@ lives in process memory.
 First install, from a homelab checkout on the Pi:
 
 ```bash
-git clone git@github.com:sillyash/Krokodiile.git ~/Krokodiile
+git clone git@github.com:sillyash/FiiReFLY.git ~/FiiReFLY
 sudo services/fiirefly/deploy.sh   # rsync api/, uv sync, env files, migrate, collectstatic, unit
 
 sudo certbot certonly --dns-cloudflare \
@@ -58,19 +64,41 @@ Then, by hand:
 
 1. Cloudflare dashboard: add the tunnel route (see [DNS](#dns-cloudflare-sillyashcom-zone)).
 2. [Arise Connect](https://connect.iiens.net/dashboard/clients): register the redirect
-   URI `https://fiirefly-api.sillyash.com/auth/callback/` on the client, put its id and
+   URI `https://fiirefly-api.sillyash.com/auth/callback/` on the client (it stays on the
+   API host, the frontend moving doesn't change it), put its id and
    secret in `/etc/fiirefly/secret.env` (`sudoedit`), then
    `sudo systemctl restart fiirefly-api`. `deploy.sh` warns while they're empty.
 
 `deploy.sh` refuses to deploy uncommitted changes in `api/`, and it reads git only as
 `$SUDO_USER`, so root never touches the repo. It deploys whatever branch is checked
-out in `~/Krokodiile`. It never copies `api/.env`: production settings only come
+out in `~/FiiReFLY`. It never copies `api/.env`: production settings only come
 from `/etc/fiirefly`.
+
+## Frontend (fiirefly.iiens.net)
+
+Not on this box: the Vue build is plain static files on the school's personal pages
+(Apache, `*.iiens.net` cert, static only), under the association account `fiirefly`.
+
+| What | Value |
+|---|---|
+| SSH | `fiirefly@perso.iiens.net`, key `~/.ssh/id_ed25519_bazzite` (`~/.ssh/config`: `Host perso.iiens.net`, `IdentityFile`, `IdentitiesOnly yes`) |
+| Docroot | `~/html/` (mode `2710`, leave it as is), served at the root of `https://fiirefly.iiens.net` |
+| Deploy | `just deploy-web` from the FiiReFLY checkout: `npm run build`, then `rsync -rltz --delete web/dist/ fiirefly@perso.iiens.net:html/` |
+
+The router uses hash URLs, so no rewrite / `.htaccess` is needed. The build needs
+Node >= 22; the Pi's Debian `nodejs` is 18, so on the Pi prefix with
+`npx -p node@24` (e.g. `npx -p node@24 just deploy-web`) or build elsewhere.
+
+The API side only needs `FIIREFLY_FRONTEND_URL` (where the login lands) and
+`FIIREFLY_CORS_ALLOWED_ORIGINS` in [`config.env`](config.env) to point at it.
+
+The old `fiirefly.sillyash.com` (GitHub Pages) is gone: CNAME deleted from the zone,
+Pages disabled on the repo.
 
 ## Update
 
 ```bash
-git -C ~/Krokodiile pull
+git -C ~/FiiReFLY pull
 sudo ~/homelab/services/fiirefly/deploy.sh
 ```
 

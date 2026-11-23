@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Deploy the FiiReFLY API (Django: public API + admin) from your own checkout of
-# sillyash/Krokodiile to a root-owned /opt/fiirefly-api.
+# sillyash/FiiReFLY to a root-owned /opt/fiirefly-api.
 #
 # Usage (pull first, as yourself — root never touches the git repo):
-#   git -C ~/Krokodiile pull
+#   git -C ~/FiiReFLY pull
 #   sudo ./deploy.sh           # deploy, migrate, collectstatic, restart
 set -euo pipefail
 
@@ -26,7 +26,7 @@ die()  { printf '\e[1;31m[ERR ]\e[0m  %s\n' "$*" >&2; exit 1; }
 [[ $# -eq 0 ]] || die "Unknown argument: $1 (usage: sudo ./deploy.sh)"
 [[ $EUID -eq 0 ]] || die "Run as root: sudo ./deploy.sh"
 [[ -n "${SUDO_USER:-}" ]] || die "Run through sudo from your own user (git runs as \$SUDO_USER)"
-[[ -f "$SRC/api/manage.py" ]] || die "No Django checkout at $SRC (clone sillyash/Krokodiile there, or set SRC)"
+[[ -f "$SRC/api/manage.py" ]] || die "No Django checkout at $SRC (clone sillyash/FiiReFLY there, or set SRC)"
 
 # ── 1. Source revision (read as the repo owner, never as root) ────────────────
 as_owner() { sudo -u "$SUDO_USER" git -C "$SRC" "$@"; }
